@@ -31,14 +31,19 @@ type Provider struct {
 
 // Item contains data for a schema
 type Item struct {
-	EndpointURL  string
-	ProviderName string
-	ProviderURL  string
-	regex        *regexp.Regexp
+	IsEndpointURLComplete bool
+	EndpointURL           string
+	ProviderName          string
+	ProviderURL           string
+	regex                 *regexp.Regexp
 }
 
 // ComposeURL returns url of oembed resource ready to be queried
 func (item *Item) ComposeURL(u string) string {
+	if item.IsEndpointURLComplete {
+		return item.EndpointURL
+	}
+
 	return item.EndpointURL + url.QueryEscape(u)
 }
 
