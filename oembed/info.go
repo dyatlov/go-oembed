@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"strconv"
 )
 
 // Info returns information for embedding website
@@ -43,6 +44,19 @@ func (info *Info) FillFromJSON(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+
+	var t int64
+	t, _ = strconv.ParseInt(info.Width.String(), 10, 64)
+	info.Width = json.Number(strconv.FormatInt(t, 10))
+
+	t, _ = strconv.ParseInt(info.Height.String(), 10, 64)
+	info.Height = json.Number(strconv.FormatInt(t, 10))
+
+	t, _ = strconv.ParseInt(info.ThumbnailWidth.String(), 10, 64)
+	info.ThumbnailWidth = json.Number(strconv.FormatInt(t, 10))
+
+	t, _ = strconv.ParseInt(info.ThumbnailHeight.String(), 10, 64)
+	info.ThumbnailHeight = json.Number(strconv.FormatInt(t, 10))
 
 	return nil
 }
