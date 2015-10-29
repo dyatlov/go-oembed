@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+// replacements to convert patterns to regexes
+var (
+	su2re1 = regexp.MustCompile("^(https?://[^/]*?)\\*(.+)$")
+	su2re2 = regexp.MustCompile("^(https?://[^/]*?/.*?)\\*(.+)$")
+	su2re3 = regexp.MustCompile("^(https?://.*?)\\*$")
+	su2re4 = regexp.MustCompile("^http://")
+)
+
 // Oembed contains list of available oembed items (official endpoints)
 type Oembed struct {
 	items []*Item
@@ -165,18 +173,13 @@ func (o *Oembed) prepareEndpointURL(url string) string {
 	return url
 }
 
-// TODO: precompile and move out regexes from the function
 func (o *Oembed) convertSchemaURL2Regexp(url string) *regexp.Regexp {
 	// domain replacements
 	url = strings.Replace(url, "?", "\\?", -1)
-	re1 := regexp.MustCompile("^(https?://[^/]*?)\\*(.+)$")
-	url = re1.ReplaceAllString(url, "${1}[^/]%?${2}")
-	re2 := regexp.MustCompile("^(https?://[^/]*?/.*?)\\*(.+)$")
-	url = re2.ReplaceAllString(url, "${1}.%?${2}")
-	re3 := regexp.MustCompile("^(https?://.*?)\\*$")
-	url = re3.ReplaceAllString(url, "${1}.%")
-	re4 := regexp.MustCompile("^http://")
-	url = re4.ReplaceAllString(url, "https?://")
+	url = su2re1.ReplaceAllString(url, "${1}[^/]%?${2}")
+	url = su2re2.ReplaceAllString(url, "${1}.%?${2}")
+	url = su2re3.ReplaceAllString(url, "${1}.%")
+	url = su2re4.ReplaceAllString(url, "https?://")
 	url = strings.Replace(url, "%", "*", -1)
 	////
 	res, err := regexp.Compile("^" + url + "$")
