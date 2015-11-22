@@ -55,25 +55,8 @@ func (item *Item) ComposeURL(u string) string {
 	return item.EndpointURL + url.QueryEscape(u)
 }
 
-// FetchOembed return oembed info from an url containing it
-func (item *Item) FetchOembed(u string, client *http.Client) (*Info, error) {
-	resURL := item.ComposeURL(u)
-
-	var resp *http.Response
+func (item *Item) parseOembed(u string, resp *http.Response) (*Info, error) {
 	var err error
-
-	if client != nil {
-		resp, err = client.Get(resURL)
-	} else {
-		resp, err = http.Get(resURL)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
 	if resp.StatusCode > 200 {
 		return &Info{Status: resp.StatusCode}, nil
 	}
@@ -100,6 +83,61 @@ func (item *Item) FetchOembed(u string, client *http.Client) (*Info, error) {
 	}
 
 	return info, nil
+}
+
+// FetchOembed return oembed info from an url containing it
+func (item *Item) FetchOembed(u string, client *http.Client) (*Info, error) {
+	resURL := item.ComposeURL(u)
+
+	var resp *http.Response
+	var err error
+
+	if client != nil {
+		resp, err = client.Get(resURL)
+	} else {
+		resp, err = http.Get(resURL)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	return item.parseOembed(u, resp)
+}
+
+// FetchOembedWithLocale return oembed info from an url containing it within provided locale
+func (item *Item) FetchOembedWithLocale(u string, client *http.Client, acceptLanguage string) (*Info, error) {
+	resURL := item.ComposeURL(u)
+
+	var resp *http.Response
+	var err error
+
+	req, err := http.NewRequest("GET", resURL, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(acceptLanguage) > 0 {
+		req.Header.Add("Accept-Language", acceptLanguage)
+	}
+
+	if client != nil {
+		resp, err = client.Do(req)
+	} else {
+		client = &http.Client{}
+		resp, err = client.Do(req)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	return item.parseOembed(u, resp)
 }
 
 // MatchURL tests if given url applies to the endpoint
