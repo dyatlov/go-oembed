@@ -3,28 +3,28 @@ package oembed
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 
 	"github.com/jeffail/gabs"
 )
 
 // Info returns information for embedding website
 type Info struct {
-	Status          int    `json:"-"`
-	Type            string `json:"type"`
-	URL             string `json:"url"`
-	ProviderURL     string `json:"provider_url"`
-	ProviderName    string `json:"provider_name"`
-	Title           string `json:"title"`
-	Description     string `json:"description"`
-	Width           uint64 `json:"width"`
-	Height          uint64 `json:"height"`
-	ThumbnailURL    string `json:"thumbnail_url"`
-	ThumbnailWidth  uint64 `json:"thumbnail_width"`
-	ThumbnailHeight uint64 `json:"thumbnail_height"`
-	AuthorName      string `json:"author_name"`
-	AuthorURL       string `json:"author_url"`
-	HTML            string `json:"html"`
+	Status          int    `json:"-,omitempty"`
+	Type            string `json:"type,omitempty"`
+	CacheAge        int64  `json:"cache_age,omitempty"`
+	URL             string `json:"url,omitempty"`
+	ProviderURL     string `json:"provider_url,omitempty"`
+	ProviderName    string `json:"provider_name,omitempty"`
+	Title           string `json:"title,omitempty"`
+	Description     string `json:"description,omitempty"`
+	Width           int64  `json:"width,omitempty"`
+	Height          int64  `json:"height,omitempty"`
+	ThumbnailURL    string `json:"thumbnail_url,omitempty"`
+	ThumbnailWidth  int64  `json:"thumbnail_width,omitempty"`
+	ThumbnailHeight int64  `json:"thumbnail_height,omitempty"`
+	AuthorName      string `json:"author_name,omitempty"`
+	AuthorURL       string `json:"author_url,omitempty"`
+	HTML            string `json:"html,omitempty"`
 }
 
 // NewInfo creater new instance of oembed.Info
@@ -34,27 +34,32 @@ func NewInfo() *Info {
 
 // FillFromJSON fills the structure from provided Oembed JSON
 func (info *Info) FillFromJSON(r io.Reader) error {
-	data, err := ioutil.ReadAll(r)
-
-	if err != nil {
-		return err
-	}
+	data := json.NewDecoder(r)
+	data.UseNumber()
 
 	// We are not using standard json parsing into struct mechanism because it sucks in real life..
 	// when you expect a string some sites will return string, some will return null but some will return false
 	// when you expect an integer, some will return integer, some will return string but some will return null or false..
-	jsonParsed, err := gabs.ParseJSON(data)
+	jsonParsed, err := gabs.ParseJSONDecoder(data)
 
 	if err != nil {
 		return err
 	}
 
 	var strVal string
-	var intVal uint64
+	var jsonNumberVal json.Number
+	var jsonNumber int64
 	var ok bool
 
 	if strVal, ok = jsonParsed.Path("type").Data().(string); ok {
 		info.Type = strVal
+	}
+
+	if jsonNumberVal, ok = jsonParsed.Path("cache_age").Data().(json.Number); ok {
+		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+			return err
+		}
+		info.CacheAge = jsonNumber
 	}
 
 	if strVal, ok = jsonParsed.Path("url").Data().(string); ok {
@@ -77,6 +82,10 @@ func (info *Info) FillFromJSON(r io.Reader) error {
 		info.Description = strVal
 	}
 
+	if strVal, ok = jsonParsed.Path("summary").Data().(string); ok {
+		info.Description = strVal // stupid nyt oembed uses summary not description
+	}
+
 	if strVal, ok = jsonParsed.Path("thumbnail_url").Data().(string); ok {
 		info.ThumbnailURL = strVal
 	}
@@ -93,20 +102,32 @@ func (info *Info) FillFromJSON(r io.Reader) error {
 		info.HTML = strVal
 	}
 
-	if intVal, ok = jsonParsed.Path("width").Data().(uint64); ok {
-		info.Width = intVal
+	if jsonNumberVal, ok = jsonParsed.Path("width").Data().(json.Number); ok {
+		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+			return err
+		}
+		info.Width = jsonNumber
 	}
 
-	if intVal, ok = jsonParsed.Path("height").Data().(uint64); ok {
-		info.Height = intVal
+	if jsonNumberVal, ok = jsonParsed.Path("height").Data().(json.Number); ok {
+		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+			return err
+		}
+		info.Height = jsonNumber
 	}
 
-	if intVal, ok = jsonParsed.Path("thumbnail_width").Data().(uint64); ok {
-		info.ThumbnailWidth = intVal
+	if jsonNumberVal, ok = jsonParsed.Path("thumbnail_width").Data().(json.Number); ok {
+		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+			return err
+		}
+		info.ThumbnailWidth = jsonNumber
 	}
 
-	if intVal, ok = jsonParsed.Path("thumbnail_height").Data().(uint64); ok {
-		info.ThumbnailHeight = intVal
+	if jsonNumberVal, ok = jsonParsed.Path("thumbnail_height").Data().(json.Number); ok {
+		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+			return err
+		}
+		info.ThumbnailHeight = jsonNumber
 	}
 
 	return nil
