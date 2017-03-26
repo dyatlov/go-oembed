@@ -2,6 +2,7 @@ package oembed
 
 import (
 	"encoding/json"
+	"strconv"
 	"io"
 
 	"github.com/jeffail/gabs"
@@ -11,17 +12,17 @@ import (
 type Info struct {
 	Status          int    `json:"-"`
 	Type            string `json:"type,omitempty"`
-	CacheAge        int64  `json:"cache_age,omitempty"`
+	CacheAge        uint64 `json:"cache_age,omitempty"`
 	URL             string `json:"url,omitempty"`
 	ProviderURL     string `json:"provider_url,omitempty"`
 	ProviderName    string `json:"provider_name,omitempty"`
 	Title           string `json:"title,omitempty"`
 	Description     string `json:"description,omitempty"`
-	Width           int64  `json:"width,omitempty"`
-	Height          int64  `json:"height,omitempty"`
+	Width           uint64 `json:"width,omitempty"`
+	Height          uint64 `json:"height,omitempty"`
 	ThumbnailURL    string `json:"thumbnail_url,omitempty"`
-	ThumbnailWidth  int64  `json:"thumbnail_width,omitempty"`
-	ThumbnailHeight int64  `json:"thumbnail_height,omitempty"`
+	ThumbnailWidth  uint64 `json:"thumbnail_width,omitempty"`
+	ThumbnailHeight uint64 `json:"thumbnail_height,omitempty"`
 	AuthorName      string `json:"author_name,omitempty"`
 	AuthorURL       string `json:"author_url,omitempty"`
 	HTML            string `json:"html,omitempty"`
@@ -30,6 +31,10 @@ type Info struct {
 // NewInfo creater new instance of oembed.Info
 func NewInfo() *Info {
 	return &Info{}
+}
+
+func jsonUint64(n json.Number) (uint64, error) {
+    return strconv.ParseUint(string(n), 10, 64)
 }
 
 // FillFromJSON fills the structure from provided Oembed JSON
@@ -48,7 +53,7 @@ func (info *Info) FillFromJSON(r io.Reader) error {
 
 	var strVal string
 	var jsonNumberVal json.Number
-	var jsonNumber int64
+	var jsonNumber uint64
 	var ok bool
 
 	if strVal, ok = jsonParsed.Path("type").Data().(string); ok {
@@ -56,7 +61,7 @@ func (info *Info) FillFromJSON(r io.Reader) error {
 	}
 
 	if jsonNumberVal, ok = jsonParsed.Path("cache_age").Data().(json.Number); ok {
-		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+		if jsonNumber, err = jsonUint64(jsonNumberVal); err != nil {
 			return err
 		}
 		info.CacheAge = jsonNumber
@@ -103,28 +108,28 @@ func (info *Info) FillFromJSON(r io.Reader) error {
 	}
 
 	if jsonNumberVal, ok = jsonParsed.Path("width").Data().(json.Number); ok {
-		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+		if jsonNumber, err = jsonUint64(jsonNumberVal); err != nil {
 			return err
 		}
 		info.Width = jsonNumber
 	}
 
 	if jsonNumberVal, ok = jsonParsed.Path("height").Data().(json.Number); ok {
-		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+		if jsonNumber, err = jsonUint64(jsonNumberVal); err != nil {
 			return err
 		}
 		info.Height = jsonNumber
 	}
 
 	if jsonNumberVal, ok = jsonParsed.Path("thumbnail_width").Data().(json.Number); ok {
-		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+		if jsonNumber, err = jsonUint64(jsonNumberVal); err != nil {
 			return err
 		}
 		info.ThumbnailWidth = jsonNumber
 	}
 
 	if jsonNumberVal, ok = jsonParsed.Path("thumbnail_height").Data().(json.Number); ok {
-		if jsonNumber, err = jsonNumberVal.Int64(); err != nil {
+		if jsonNumber, err = jsonUint64(jsonNumberVal); err != nil {
 			return err
 		}
 		info.ThumbnailHeight = jsonNumber
