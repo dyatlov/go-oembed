@@ -51,7 +51,7 @@ func main() {
 		item := oe.FindItem(url)
 
 		if item != nil {
-			info, err := item.FetchOembed(url, nil)
+			info, err := item.FetchOembed(oembed.Options{URL: url})
 			if err != nil {
 				fmt.Printf("An error occured: %s\n", err.Error())
 			} else {

@@ -36,7 +36,7 @@ func main() {
 		item := oe.FindItem(url)
 
 		if item != nil {
-			info, err := item.FetchOembedWithLocale(url, nil, "en-us")
+			info, err := item.FetchOembed(oembed.Options{URL: url, AcceptLanguage: "en-us"})
 			if err != nil {
 				fmt.Printf("An error occured: %s\n", err.Error())
 			} else {
