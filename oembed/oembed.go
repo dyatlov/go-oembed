@@ -2,6 +2,7 @@ package oembed
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -46,6 +47,14 @@ type Item struct {
 	regex                 *regexp.Regexp
 }
 
+type Options struct {
+	Client         *http.Client
+	URL            string
+	MaxWidth       int
+	MaxHeight      int
+	AcceptLanguage string
+}
+
 // ComposeURL returns url of oembed resource ready to be queried
 func (item *Item) ComposeURL(u string) string {
 	if item.IsEndpointURLComplete {
@@ -86,33 +95,16 @@ func (item *Item) parseOembed(u string, resp *http.Response) (*Info, error) {
 }
 
 // FetchOembed return oembed info from an url containing it
-func (item *Item) FetchOembed(u string, client *http.Client) (*Info, error) {
-	resURL := item.ComposeURL(u)
+func (item *Item) FetchOembed(opts Options) (*Info, error) {
+	resURL := item.ComposeURL(opts.URL)
 
-	var resp *http.Response
-	var err error
-
-	if client != nil {
-		resp, err = client.Get(resURL)
-	} else {
-		resp, err = http.Get(resURL)
+	if opts.MaxWidth > 0 {
+		resURL = fmt.Sprintf("%s&maxwidth=%d", resURL, opts.MaxWidth)
 	}
 
-	if err != nil {
-		return nil, err
+	if opts.MaxHeight > 0 {
+		resURL = fmt.Sprintf("%s&maxheight=%d", resURL, opts.MaxHeight)
 	}
-
-	defer resp.Body.Close()
-
-	return item.parseOembed(u, resp)
-}
-
-// FetchOembedWithLocale return oembed info from an url containing it within provided locale
-func (item *Item) FetchOembedWithLocale(u string, client *http.Client, acceptLanguage string) (*Info, error) {
-	resURL := item.ComposeURL(u)
-
-	var resp *http.Response
-	var err error
 
 	req, err := http.NewRequest("GET", resURL, nil)
 
@@ -120,14 +112,15 @@ func (item *Item) FetchOembedWithLocale(u string, client *http.Client, acceptLan
 		return nil, err
 	}
 
-	if len(acceptLanguage) > 0 {
-		req.Header.Add("Accept-Language", acceptLanguage)
+	if len(opts.AcceptLanguage) > 0 {
+		req.Header.Add("Accept-Language", opts.AcceptLanguage)
 	}
 
-	if client != nil {
-		resp, err = client.Do(req)
+	var resp *http.Response
+	if opts.Client != nil {
+		resp, err = opts.Client.Do(req)
 	} else {
-		client = &http.Client{}
+		client := &http.Client{}
 		resp, err = client.Do(req)
 	}
 
@@ -137,7 +130,7 @@ func (item *Item) FetchOembedWithLocale(u string, client *http.Client, acceptLan
 
 	defer resp.Body.Close()
 
-	return item.parseOembed(u, resp)
+	return item.parseOembed(opts.URL, resp)
 }
 
 // MatchURL tests if given url applies to the endpoint
