@@ -8,7 +8,7 @@ To download and install this package run:
 
 `go get github.com/dyatlov/go-oembed/oembed`
 
-Source docs: http://godoc.org/github.com/dyatlov/go-oembed
+Source docs: http://godoc.org/github.com/dyatlov/go-oembed/oembed
 
 An example use:
 

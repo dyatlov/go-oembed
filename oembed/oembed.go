@@ -47,6 +47,7 @@ type Item struct {
 	regex                 *regexp.Regexp
 }
 
+// Options contains options to pass to FetchOembed method
 type Options struct {
 	Client         *http.Client
 	URL            string
