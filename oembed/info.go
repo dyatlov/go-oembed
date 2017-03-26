@@ -9,7 +9,7 @@ import (
 
 // Info returns information for embedding website
 type Info struct {
-	Status          int    `json:"-,omitempty"`
+	Status          int    `json:"-"`
 	Type            string `json:"type,omitempty"`
 	CacheAge        int64  `json:"cache_age,omitempty"`
 	URL             string `json:"url,omitempty"`
