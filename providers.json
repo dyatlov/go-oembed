@@ -737,7 +737,7 @@
                     "http:\/\/www.instagram.com\/p\/*",
                     "http:\/\/www.instagr.am\/p\/*",
                     "https:\/\/www.instagram.com\/p\/*",
-                    "https:\/\/www.instagr.am\/p\/*",
+                    "https:\/\/www.instagr.am\/p\/*"
                 ],
                 "url": "http:\/\/api.instagram.com\/oembed",
                 "formats": [
