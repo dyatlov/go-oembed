@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"io"
 
-	"github.com/jeffail/gabs"
+	"github.com/Jeffail/gabs"
 )
 
 // Info returns information for embedding website
