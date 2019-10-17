@@ -1,16 +1,20 @@
 GO Oembed
-===
+=========
 
-Go Oembed provides methods to retrieve oembed data from known providers.
-Provider list can be fetched from this repository or from http://oembed.com/providers.json
+[![GoDoc](https://godoc.org/github.com/dyatlov/go-oembed/oembed?status.svg)](https://godoc.org/github.com/dyatlov/go-oembed/oembed)
 
-To download and install this package run:
+Go Oembed provides methods to retrieve oEmbed data from known providers.
+The provider list can be fetched from this repository or from [oembed.com/providers.json](https://oembed.com/providers.json)
+
+
+Install
+-------
 
 `go get github.com/dyatlov/go-oembed/oembed`
 
-Source docs: http://godoc.org/github.com/dyatlov/go-oembed/oembed
 
-An example use:
+Example
+-------
 
 ```go
 package main
