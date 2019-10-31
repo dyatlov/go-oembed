@@ -1,6 +1,7 @@
 package oembed
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -54,6 +55,7 @@ type Options struct {
 	MaxWidth       int
 	MaxHeight      int
 	AcceptLanguage string
+	ExtraOpts      map[string]string
 }
 
 // ComposeURL returns url of oembed resource ready to be queried
@@ -95,6 +97,16 @@ func (item *Item) parseOembed(u string, resp *http.Response) (*Info, error) {
 	return info, nil
 }
 
+func buildQueryString(params map[string]string) string {
+	var b bytes.Buffer
+
+	for key, value := range params {
+		b.WriteString(fmt.Sprintf("&%s=%s", key, value))
+	}
+
+	return b.String()
+}
+
 // FetchOembed return oembed info from an url containing it
 func (item *Item) FetchOembed(opts Options) (*Info, error) {
 	resURL := item.ComposeURL(opts.URL)
@@ -105,6 +117,10 @@ func (item *Item) FetchOembed(opts Options) (*Info, error) {
 
 	if opts.MaxHeight > 0 {
 		resURL = fmt.Sprintf("%s&maxheight=%d", resURL, opts.MaxHeight)
+	}
+
+	if len(opts.ExtraOpts) > 0 {
+		resURL = fmt.Sprintf("%s%s", resURL, buildQueryString(opts.ExtraOpts))
 	}
 
 	req, err := http.NewRequest("GET", resURL, nil)
