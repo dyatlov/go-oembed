@@ -54,6 +54,7 @@ type Options struct {
 	MaxWidth       int
 	MaxHeight      int
 	AcceptLanguage string
+	ExtraOpts      url.Values
 }
 
 // ComposeURL returns url of oembed resource ready to be queried
@@ -99,12 +100,22 @@ func (item *Item) parseOembed(u string, resp *http.Response) (*Info, error) {
 func (item *Item) FetchOembed(opts Options) (*Info, error) {
 	resURL := item.ComposeURL(opts.URL)
 
+	params := url.Values{}
+
 	if opts.MaxWidth > 0 {
-		resURL = fmt.Sprintf("%s&maxwidth=%d", resURL, opts.MaxWidth)
+		params.Add("maxwidth", fmt.Sprintf("%d", opts.MaxWidth))
 	}
 
 	if opts.MaxHeight > 0 {
-		resURL = fmt.Sprintf("%s&maxheight=%d", resURL, opts.MaxHeight)
+		params.Add("maxheight", fmt.Sprintf("%d", opts.MaxHeight))
+	}
+
+	if len(params) > 0 {
+		resURL = fmt.Sprintf("%s&%s", resURL, params.Encode())
+	}
+
+	if len(opts.ExtraOpts) > 0 {
+		resURL = fmt.Sprintf("%s&%s", resURL, opts.ExtraOpts.Encode())
 	}
 
 	req, err := http.NewRequest("GET", resURL, nil)

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"strings"
 
@@ -21,6 +22,8 @@ func main() {
 	oe := oembed.NewOembed()
 	oe.ParseProviders(bytes.NewReader(data))
 
+	extras := url.Values{"autoplay": []string{"1"}}
+
 	for {
 
 		reader := bufio.NewReader(os.Stdin)
@@ -36,7 +39,7 @@ func main() {
 		item := oe.FindItem(url)
 
 		if item != nil {
-			info, err := item.FetchOembed(oembed.Options{URL: url, AcceptLanguage: "en-us"})
+			info, err := item.FetchOembed(oembed.Options{URL: url, AcceptLanguage: "en-us", ExtraOpts: extras})
 			if err != nil {
 				fmt.Printf("An error occured: %s\n", err.Error())
 			} else {
