@@ -31,6 +31,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	data, err := ioutil.ReadFile("../providers.json")
 
 	if err != nil {
@@ -55,7 +57,7 @@ func main() {
 		item := oe.FindItem(url)
 
 		if item != nil {
-			info, err := item.FetchOembed(oembed.Options{URL: url})
+			info, err := item.FetchOembedCtx(ctx, oembed.Options{URL: url})
 			if err != nil {
 				fmt.Printf("An error occured: %s\n", err.Error())
 			} else {

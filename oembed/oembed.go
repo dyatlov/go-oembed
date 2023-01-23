@@ -1,6 +1,7 @@
 package oembed
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -98,6 +99,11 @@ func (item *Item) parseOembed(u string, resp *http.Response) (*Info, error) {
 
 // FetchOembed return oembed info from an url containing it
 func (item *Item) FetchOembed(opts Options) (*Info, error) {
+	return item.FetchOembedWithContext(context.Background(), opts)
+}
+
+// FetchOembedWithContext return oembed info from an url containing it
+func (item *Item) FetchOembedWithContext(ctx context.Context, opts Options) (*Info, error) {
 	resURL := item.ComposeURL(opts.URL)
 
 	params := url.Values{}
@@ -118,7 +124,7 @@ func (item *Item) FetchOembed(opts Options) (*Info, error) {
 		resURL = fmt.Sprintf("%s&%s", resURL, opts.ExtraOpts.Encode())
 	}
 
-	req, err := http.NewRequest("GET", resURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, resURL, nil)
 
 	if err != nil {
 		return nil, err
@@ -132,8 +138,7 @@ func (item *Item) FetchOembed(opts Options) (*Info, error) {
 	if opts.Client != nil {
 		resp, err = opts.Client.Do(req)
 	} else {
-		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err = http.DefaultClient.Do(req)
 	}
 
 	if err != nil {
