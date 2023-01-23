@@ -42,7 +42,7 @@ func main() {
 		item := oe.FindItem(url)
 
 		if item != nil {
-			info, err := item.FetchOembedCtx(ctx, oembed.Options{URL: url, AcceptLanguage: "en-us", ExtraOpts: extras})
+			info, err := item.FetchOembedWithContext(ctx, oembed.Options{URL: url, AcceptLanguage: "en-us", ExtraOpts: extras})
 			if err != nil {
 				fmt.Printf("An error occured: %s\n", err.Error())
 			} else {
